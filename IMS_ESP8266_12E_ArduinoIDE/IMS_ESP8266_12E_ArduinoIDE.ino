@@ -1,23 +1,19 @@
-/*****************************************************************************************
- * Purpose : Zabbix Sensor Agent - Environmental Monitoring Solution                     *
- * Author  : Evgeny Levkov                                                               *
- * Credits:                                                                              *
- *           JO3RI www.JO3RI.be/arduino - for web based ethernet config with EEPROM code *
- *           Rob Faludi http://www.faludi.com - for free memory test code                *
- *****************************************************************************************/
 
-// ZSA1-E
 //Credits: 
 // JO3RI www.JO3RI.be/arduino - for web based ethernet config with EEPROM code
 // Rob Faludi http://www.faludi.com - for free memory test code
 // Evgeny Levkov - Zabbix Agent implementation http://www.sensor.im
 
 //-----------------INCLUDES--------------------
+
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+
 #include <SPI.h>
-#include <Ethernet.h>
 #include "DHT.h"         // Download at https://github.com/adafruit/DHT-sensor-library
 //#include <avr/pgmspace.h>
 //--------------------------------------------
+
 #define MAX_CMD_LENGTH   25
 #define MAX_LINE 20
 
@@ -28,7 +24,7 @@ float humidity = 37;
 
 #define DHTTYPE DHT22
 DHT dht(DHT22_PIN, DHTTYPE);
-//--------------------------------------------
+
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x00, 0xE3, 0x5B };
 
 IPAddress ip(192, 168, 1, 222);
@@ -40,7 +36,7 @@ EthernetClient client;
 
 
 
-String cmd; //FOR ZABBIX COMMAND
+String cmd; //ZABBIX COMMAND BUFFER
 bool cmd_name_started = false;
 
 
@@ -123,8 +119,7 @@ void parseCommand() {  //Commands recieved by agent on port 10050 parsing
       
 // NOT SUPPORTED      
   } else {
-    //  server.println("ZBXDZBX_NOTSUPPORTED");
-    server.println(cmd);
+    server.println("ZBXDZBX_NOTSUPPORTED");
       client.stop();
   }
   cmd = "";
