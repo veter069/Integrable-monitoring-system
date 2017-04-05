@@ -2,8 +2,8 @@
 #include <ESP8266WiFi.h>
 #include "DHT.h"
 
-const char* ssid = "PWNed";
-const char* password = "mrLYw*d*";
+const char* ssid = "";
+const char* password = "";
 
 // Create an instance of the server
 // specify the port to listen on as an argument
@@ -66,16 +66,25 @@ void loop() {
     Serial.println((int)(req[i]));  
   }
 
-  UpdateSensors();
-  client.print("temperature: ");
-  client.println(temperature);
-  client.print("humidity: ");
-  client.println(humidity);
-  //String s = "";
+  if (req.indexOf("agent.ping") != -1){
+    client.println("1");
+  } 
+  else if (req.indexOf("agent.version") != -1){
+    client.println("EnviMon 0.0.2");
+  } 
+  else if (req.indexOf("environment.temperature") != -1){
+    UpdateSensors();
+    client.println(temperature);
+  } 
+  else if (req.indexOf("environment.humidity") != -1){
+    UpdateSensors();
+    client.println(humidity);
+  } 
+  else {
+    server.println("ZBXDZBX_NOTSUPPORTED");
+  }
   
   client.flush();
-  
-return;
 
   // The client will actually be disconnected 
   // when the function returns and 'client' object is detroyed
