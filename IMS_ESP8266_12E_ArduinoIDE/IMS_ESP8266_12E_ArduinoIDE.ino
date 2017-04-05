@@ -1,131 +1,88 @@
 
-//Credits: 
-// JO3RI www.JO3RI.be/arduino - for web based ethernet config with EEPROM code
-// Rob Faludi http://www.faludi.com - for free memory test code
-// Evgeny Levkov - Zabbix Agent implementation http://www.sensor.im
-
-//-----------------INCLUDES--------------------
-
 #include <ESP8266WiFi.h>
-#include <ESP8266WiFiMulti.h>
+#include "DHT.h"
 
-#include <SPI.h>
-#include "DHT.h"         // Download at https://github.com/adafruit/DHT-sensor-library
-//#include <avr/pgmspace.h>
-//--------------------------------------------
+const char* ssid = "PWNed";
+const char* password = "mrLYw*d*";
 
-#define MAX_CMD_LENGTH   25
-#define MAX_LINE 20
-
-int DHT22_PIN = A0; 
-
-float temperature = 23;
-float humidity = 37;
+// Create an instance of the server
+// specify the port to listen on as an argument
+WiFiServer server(10050);
 
 #define DHTTYPE DHT22
+int DHT22_PIN = D2; 
+float temperature = 23;
+float humidity = 37;
 DHT dht(DHT22_PIN, DHTTYPE);
 
-byte mac[] = { 0x90, 0xA2, 0xDA, 0x00, 0xE3, 0x5B };
+void setup() {
+  Serial.begin(115200);
+  delay(10);
 
-IPAddress ip(192, 168, 1, 222);
-IPAddress gateway(192, 168, 1, 1);
-IPAddress subnet(255, 255, 255, 0);
-
-EthernetServer server = EthernetServer(10050); //Zabbix Agent port //Zabbix agent port
-EthernetClient client;
-
-
-
-String cmd; //ZABBIX COMMAND BUFFER
-bool cmd_name_started = false;
-
-
-int led = 13; //LED PORT TO BLINK AFTER RECIEVING ZABBIX COMMAND
-
-
-void setup()
-{
-  Serial.begin(9600);
-  Ethernet.begin(mac, ip, gateway, subnet);
+  // prepare GPIO2
+  pinMode(2, OUTPUT);
+  digitalWrite(2, 0);
+  
+  // Connect to WiFi network
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
+  
+  // Start the server
   server.begin();
+  Serial.println("Server started");
 
-  Serial.print("server is at ");
-  Serial.println(Ethernet.localIP());
-  
-  pinMode(2, OUTPUT); //???
-  pinMode(7, INPUT_PULLUP); //???
-  pinMode(led, OUTPUT);    
-  digitalWrite(led, LOW);
- 
+  // Print the IP address
+  Serial.println(WiFi.localIP());
 }
 
-void loop()
-{
-//--------------------------------------------
-  client = server.available();
-  if (client) {
-    //client.flush();
-    while (client.connected()) {
-      if(client.available() > 0) {
-        readTelnetCommand(client.read());
-      }
-    }
-  }
-}
-
-//--------------------------------------------
-void readTelnetCommand(char c) {
-
-  if(cmd.length() == MAX_CMD_LENGTH) {
-    cmd = "";
+void loop() {
+  // Check if a client has connected
+  WiFiClient client = server.available();
+  if (!client) {
+    return;
   }
   
-  Serial.println((int)c);
+  // Wait until the client sends some data
+  Serial.println("new client");
+  while(!client.available()){
+    delay(1);
+  }
+
   
-  if(c == '\n' || c=='\r') {
-    if(cmd.length() > 2) {
-      // remove \r and \n from the string
-      parseCommand();
-    }
-  }else{
-    cmd += c;
+  // Read the first line of the request
+  String req = client.readStringUntil('\r');
+  for(int i=0; i< req.length(); i++){
+    Serial.println((int)(req[i]));  
   }
-}
-//--------------------------------------------
-void parseCommand() {  //Commands recieved by agent on port 10050 parsing
-  Serial.println(cmd);
-  // AGENT.PING      
-  if(cmd.equals("agent.ping")) {
-      client.println("1");
-      client.stop();
 
- // AGENT.VERSION      
-   } else if(cmd.equals("agent.version")) {
-      server.println("Sensor.IM 1.0");
-      client.stop();
-   }
-  else if(cmd.equals("humidity")) {
-    humidity = dht.readHumidity();
-    server.println(humidity);
-    client.stop();
-    delay(2000);
+  UpdateSensors();
+  client.print("temperature: ");
+  client.println(temperature);
+  client.print("humidity: ");
+  client.println(humidity);
+  //String s = "";
+  
+  client.flush();
+  
+return;
 
-// TEMPERATURE.READ
-} else if(cmd.equals("temperature")) {
-      temperature = dht.readTemperature();
-       server.println(temperature);
-      client.stop();
-      delay(2000);
-      
-// NOT SUPPORTED      
-  } else {
-    server.println("ZBXDZBX_NOTSUPPORTED");
-      client.stop();
-  }
-  cmd = "";
+  // The client will actually be disconnected 
+  // when the function returns and 'client' object is detroyed
 }
 
- void UpdateSensors(){
+
+void UpdateSensors(){
   temperature = dht.readTemperature();
   humidity = dht.readHumidity();
   //light = lightMeter.readLightLevel();
