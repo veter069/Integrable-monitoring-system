@@ -21,6 +21,9 @@ bool flooding = false;
 int MOTION_PIN = D7;
 bool motion = false;
 
+int GAS_PIN = A0;
+int gas = 0;
+
 void setup() {
   Serial.begin(115200);
   delay(10);
@@ -34,6 +37,10 @@ void setup() {
 
   // prepare PIR motion Sensor pin
   pinMode(MOTION_PIN, INPUT);
+
+  // prepare Gas Sensor pin
+  pinMode(GAS_PIN, INPUT);
+  
   
   // Connect to WiFi network
   Serial.println();
@@ -108,6 +115,11 @@ void loop() {
     client.println(motion);
     Serial.println(motion);
   }
+  else if (req.indexOf("environment.gas") != -1){
+    UpdateSensors();
+    client.println(gas);
+    Serial.println(gas);
+  }
   else {
     server.println("ZBXDZBX_NOTSUPPORTED");
     Serial.println("ZBXDZBX_NOTSUPPORTED");
@@ -132,6 +144,6 @@ void UpdateSensors(){
   
   motion = (digitalRead(MOTION_PIN) == HIGH);
 
-  //gas = analogRead(GasPin);
+  gas = analogRead(GAS_PIN);
 }
 
