@@ -2,8 +2,8 @@
 #include <ESP8266WiFi.h>
 #include "DHT.h"
 
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "Frosters";
+const char* password = "!#DidYouTryHard?!A";
 
 // Create an instance of the server
 // specify the port to listen on as an argument
@@ -15,13 +15,19 @@ float temperature = 23;
 float humidity = 37;
 DHT dht(DHT22_PIN, DHTTYPE);
 
+int WATER_PIN = D3;
+bool flooding = false;
+
 void setup() {
   Serial.begin(115200);
   delay(10);
 
-  // prepare GPIO2
-  pinMode(2, OUTPUT);
-  digitalWrite(2, 0);
+  // prepare DHT22 pin
+  pinMode(DHT22_PIN, OUTPUT);
+  digitalWrite(DHT22_PIN, 0);
+
+  // prepare Water Sensor pin
+  pinMode(WATER_PIN, INPUT);
   
   // Connect to WiFi network
   Serial.println();
@@ -54,6 +60,7 @@ void loop() {
   }
   
   // Wait until the client sends some data
+  Serial.println("");
   Serial.println("new client");
   while(!client.available()){
     delay(1);
@@ -62,26 +69,37 @@ void loop() {
   
   // Read the first line of the request
   String req = client.readStringUntil('\r');
-  for(int i=0; i< req.length(); i++){
-    Serial.println((int)(req[i]));  
-  }
+  Serial.println(req);
+//  for(int i=0; i< req.length(); i++){
+//    Serial.println((int)(req[i]));  
+//  }
 
   if (req.indexOf("agent.ping") != -1){
     client.println("1");
+    Serial.println();
   } 
   else if (req.indexOf("agent.version") != -1){
     client.println("EnviMon 0.0.2");
+    Serial.println("EnviMon 0.0.2");
   } 
   else if (req.indexOf("environment.temperature") != -1){
-    UpdateSensors();
+    UpdateDHT();
     client.println(temperature);
+    Serial.println(temperature);
   } 
   else if (req.indexOf("environment.humidity") != -1){
-    UpdateSensors();
+    UpdateDHT();
     client.println(humidity);
+    Serial.println(humidity);
   } 
+  else if (req.indexOf("environment.flooding") != -1){
+    UpdateSensors();
+    client.println(flooding);
+    Serial.println(flooding);
+  }
   else {
     server.println("ZBXDZBX_NOTSUPPORTED");
+    Serial.println("ZBXDZBX_NOTSUPPORTED");
   }
   
   client.flush();
@@ -90,14 +108,16 @@ void loop() {
   // when the function returns and 'client' object is detroyed
 }
 
-
-void UpdateSensors(){
+void UpdateDHT(){
   temperature = dht.readTemperature();
   humidity = dht.readHumidity();
+}
+
+void UpdateSensors(){
   //light = lightMeter.readLightLevel();
   
-  //ws = analogRead(WaterSensorPin);
-  //flooded = (ws > 300);
+  flooding = digitalRead(WATER_PIN);
+  //flooding = (ws > 300);
   
   //motion = (digitalRead(motionPin) == HIGH);
 
