@@ -18,6 +18,9 @@ DHT dht(DHT22_PIN, DHTTYPE);
 int WATER_PIN = D3;
 bool flooding = false;
 
+int MOTION_PIN = D7;
+bool motion = false;
+
 void setup() {
   Serial.begin(115200);
   delay(10);
@@ -28,6 +31,9 @@ void setup() {
 
   // prepare Water Sensor pin
   pinMode(WATER_PIN, INPUT);
+
+  // prepare PIR motion Sensor pin
+  pinMode(MOTION_PIN, INPUT);
   
   // Connect to WiFi network
   Serial.println();
@@ -97,6 +103,11 @@ void loop() {
     client.println(flooding);
     Serial.println(flooding);
   }
+  else if (req.indexOf("environment.motion") != -1){
+    UpdateSensors();
+    client.println(motion);
+    Serial.println(motion);
+  }
   else {
     server.println("ZBXDZBX_NOTSUPPORTED");
     Serial.println("ZBXDZBX_NOTSUPPORTED");
@@ -116,10 +127,10 @@ void UpdateDHT(){
 void UpdateSensors(){
   //light = lightMeter.readLightLevel();
   
-  flooding = digitalRead(WATER_PIN);
+  flooding = (digitalRead(WATER_PIN) == HIGH);
   //flooding = (ws > 300);
   
-  //motion = (digitalRead(motionPin) == HIGH);
+  motion = (digitalRead(MOTION_PIN) == HIGH);
 
   //gas = analogRead(GasPin);
 }
