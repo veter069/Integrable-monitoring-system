@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
-    <version>3.0</version>
-    <date>2017-04-06T04:18:38Z</date>
+    <version>3.2</version>
+    <date>2017-05-25T12:30:29Z</date>
     <groups>
         <group>
             <name>Environment monitoring</name>
@@ -20,6 +20,7 @@
             <applications/>
             <items/>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates>
                 <template>
@@ -145,6 +146,7 @@
             <applications/>
             <items/>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates>
                 <template>
@@ -184,6 +186,30 @@
             </screens>
         </template>
         <template>
+            <template>EMS Device Minimal - Server room</template>
+            <name>EMS Device Minimal - Server room</name>
+            <description>Basically a DHT22 probe used inside a server room</description>
+            <groups>
+                <group>
+                    <name>Environment monitoring</name>
+                </group>
+            </groups>
+            <applications/>
+            <items/>
+            <discovery_rules/>
+            <httptests/>
+            <macros/>
+            <templates>
+                <template>
+                    <name>EMS Device minimal</name>
+                </template>
+                <template>
+                    <name>Template App Zabbix Agent</name>
+                </template>
+            </templates>
+            <screens/>
+        </template>
+        <template>
             <template>EnviMon_Param_CO2</template>
             <name>EnviMon_Param_CO2</name>
             <description>Getting current carbon dioxide value</description>
@@ -205,7 +231,7 @@
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>environment.co2</key>
-                    <delay>30</delay>
+                    <delay>120</delay>
                     <history>90</history>
                     <trends>365</trends>
                     <status>0</status>
@@ -243,6 +269,7 @@
                 </item>
             </items>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates/>
             <screens/>
@@ -269,7 +296,7 @@
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>environment.flooding</key>
-                    <delay>30</delay>
+                    <delay>360</delay>
                     <history>90</history>
                     <trends>365</trends>
                     <status>0</status>
@@ -307,6 +334,7 @@
                 </item>
             </items>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates/>
             <screens/>
@@ -333,7 +361,7 @@
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>environment.humidity</key>
-                    <delay>30</delay>
+                    <delay>60</delay>
                     <history>90</history>
                     <trends>365</trends>
                     <status>0</status>
@@ -371,6 +399,7 @@
                 </item>
             </items>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates/>
             <screens/>
@@ -435,6 +464,7 @@
                 </item>
             </items>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates/>
             <screens/>
@@ -499,6 +529,7 @@
                 </item>
             </items>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates/>
             <screens/>
@@ -525,7 +556,7 @@
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>environment.temperature</key>
-                    <delay>30</delay>
+                    <delay>90</delay>
                     <history>90</history>
                     <trends>365</trends>
                     <status>0</status>
@@ -563,6 +594,7 @@
                 </item>
             </items>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates/>
             <screens/>
@@ -579,6 +611,7 @@
             <applications/>
             <items/>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates>
                 <template>
@@ -599,6 +632,7 @@
             <applications/>
             <items/>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates>
                 <template>
@@ -622,6 +656,7 @@
             <applications/>
             <items/>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates>
                 <template>
@@ -642,6 +677,7 @@
             <applications/>
             <items/>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates>
                 <template>
@@ -662,6 +698,7 @@
             <applications/>
             <items/>
             <discovery_rules/>
+            <httptests/>
             <macros/>
             <templates>
                 <template>
@@ -671,6 +708,72 @@
             <screens/>
         </template>
     </templates>
+    <triggers>
+        <trigger>
+            <expression>{EMS Device Minimal - Server room:environment.humidity.last()}&gt;80</expression>
+            <recovery_mode>0</recovery_mode>
+            <recovery_expression/>
+            <name>Humidity is too high</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>4</priority>
+            <description/>
+            <type>1</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
+        <trigger>
+            <expression>{EMS Device Minimal - Server room:environment.humidity.last()}&lt;20</expression>
+            <recovery_mode>0</recovery_mode>
+            <recovery_expression/>
+            <name>Humidity is too low</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>4</priority>
+            <description/>
+            <type>0</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
+        <trigger>
+            <expression>{EMS Device Minimal - Server room:environment.temperature.last()}&gt;30</expression>
+            <recovery_mode>0</recovery_mode>
+            <recovery_expression/>
+            <name>Temperature is extremely high!</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>5</priority>
+            <description/>
+            <type>0</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
+        <trigger>
+            <expression>{EMS Device Minimal - Server room:environment.temperature.last()}&gt;27</expression>
+            <recovery_mode>0</recovery_mode>
+            <recovery_expression/>
+            <name>Temperature is too high</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>4</priority>
+            <description/>
+            <type>0</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
+    </triggers>
     <graphs>
         <graph>
             <name>CO2 measure</name>
@@ -821,7 +924,7 @@
                 <graph_item>
                     <sortorder>0</sortorder>
                     <drawtype>0</drawtype>
-                    <color>333333</color>
+                    <color>CC0000</color>
                     <yaxisside>0</yaxisside>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
