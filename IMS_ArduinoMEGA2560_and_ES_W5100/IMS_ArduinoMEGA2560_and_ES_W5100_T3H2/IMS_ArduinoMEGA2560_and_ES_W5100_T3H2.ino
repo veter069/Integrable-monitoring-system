@@ -212,7 +212,7 @@ void parseCommand() {  //Commands recieved by agent on port 10050 parsing
     UpdateCO2();
     client.println(co2);
     client.stop();
-  }   
+  }
    // NOT SUPPORTED      
   else {
     //  server.println("ZBXDZBX_NOTSUPPORTED");
