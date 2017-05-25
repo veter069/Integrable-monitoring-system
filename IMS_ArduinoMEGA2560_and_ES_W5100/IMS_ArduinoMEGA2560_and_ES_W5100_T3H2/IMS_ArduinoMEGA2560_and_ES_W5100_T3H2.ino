@@ -68,10 +68,12 @@ void setup()
 {
   dht11 = new DHT(DHT11_PIN, DHTTYPE_11);
   dht22 = new DHT(DHT22_PIN, DHTTYPE_22);
+  bmp.begin();
   
   Serial.begin(9600);
   Ethernet.begin(mac, ip, gateway, subnet);
-  server.begin();
+  if (!bmp.begin()) {
+    Serial.println("Could not find a valid BMP085 sensor, check wiring!");}
 
   Serial.print("server is at ");
   Serial.println(Ethernet.localIP());
@@ -236,7 +238,7 @@ void UpdateTemperature3(){
   temperature3 = bmp.readTemperature();
 }
 void UpdatePressure(){
-  pressure = (bmp.readPressure())/133.3224;
+  pressure = ((bmp.readPressure())/133.3224);
 }
 void UpdateFlooding(){
   flooding = (digitalRead(WATER_PIN) == HIGH);
