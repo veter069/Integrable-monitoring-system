@@ -28,6 +28,10 @@
 // Mega2560 -> BMP180; 20 -> (SDA), 21 -> (SCL)
 
 int LED_PIN = 13;
+int RELAY1_PIN = 22;
+int RELAY2_PIN = 23;
+int RELAY3_PIN = 24;
+int RELAY4_PIN = 25;
 int WATER_PIN = 26;
 int PIEZO_PIN = 46;
 int MOTION_PIN = 50;
@@ -46,6 +50,10 @@ float pressure = 666;
 float humidity2 = 666;
 bool flooding = false;
 bool motion = false;
+bool relay1_state = true;
+bool relay2_state = true;
+bool relay3_state = true;
+bool relay4_state = true;
 int co2 = 666;
 
 #define DHTTYPE_11 DHT11
@@ -105,6 +113,16 @@ void setup()
 
   // prepare piezo buzzer pin
   pinMode(PIEZO_PIN, OUTPUT);
+
+  // prepare relay pins
+  pinMode(RELAY1_PIN, OUTPUT);
+  digitalWrite(RELAY1_PIN, relay1_state);
+  pinMode(RELAY2_PIN, OUTPUT);
+  digitalWrite(RELAY2_PIN, relay2_state);
+  pinMode(RELAY3_PIN, OUTPUT);
+  digitalWrite(RELAY3_PIN, relay3_state);
+  pinMode(RELAY4_PIN, OUTPUT);
+  digitalWrite(RELAY4_PIN, relay4_state);
 }
 
 void loop()
@@ -219,10 +237,30 @@ void parseCommand() {  //Commands recieved by agent on port 10050 parsing
   }
      // Buzzer beep
   else if(cmd.equals("environment.buzzer")) {
-    beep(15, 5);
+    beep(15, 3);
     client.stop();
   }
-    // NOT SUPPORTED      
+    // Rellay1 control
+  else if(cmd.equals("environment.relay1")) {
+    relay1();
+    client.stop();
+  }
+    // Rellay2 control
+  else if(cmd.equals("environment.relay2")) {
+      relay2();
+    client.stop();
+  }
+    // Rellay3 control
+  else if(cmd.equals("environment.relay3")) {
+    relay3();
+    client.stop();
+  }
+    // Rellay4 control
+  else if(cmd.equals("environment.relay4")) {
+    relay4();
+    client.stop();
+  }
+   // NOT SUPPORTED      
   else {
     //  server.println("ZBXDZBX_NOTSUPPORTED");
     client.println(cmd);
@@ -266,4 +304,21 @@ void beep(unsigned char delayms,unsigned char cicle){
    } 
 }
 }
+void relay1(){
+  relay1_state = !relay1_state;
+  digitalWrite(RELAY1_PIN, relay1_state); 
+}
+void relay2(){
+  relay2_state = !relay2_state;
+  digitalWrite(RELAY2_PIN, relay2_state); 
+}
+void relay3(){
+  relay3_state = !relay3_state;
+  digitalWrite(RELAY3_PIN, relay3_state); 
+}
+void relay4(){
+  relay4_state = !relay4_state;
+  digitalWrite(RELAY4_PIN, relay4_state); 
+}
+
 
