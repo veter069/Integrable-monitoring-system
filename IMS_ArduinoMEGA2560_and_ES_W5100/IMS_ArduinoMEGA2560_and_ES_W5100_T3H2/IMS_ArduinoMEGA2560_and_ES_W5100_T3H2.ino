@@ -27,6 +27,7 @@
 // Connect VCC of the BMP_085/180 sensor to 3.3V (NOT 5.0V!)
 // Mega2560 -> BMP180; 20 -> (SDA), 21 -> (SCL)
 
+int NOISE_PIN = 9;
 int LED_PIN = 13;
 int RELAY1_PIN = 22;
 int RELAY2_PIN = 23;
@@ -50,6 +51,7 @@ float pressure = 666;
 float humidity2 = 666;
 bool flooding = false;
 bool motion = false;
+bool noise = false;
 bool relay1_state = true;
 bool relay2_state = true;
 bool relay3_state = true;
@@ -114,6 +116,9 @@ void setup()
   // prepare piezo buzzer pin
   pinMode(PIEZO_PIN, OUTPUT);
 
+  // prepare noise sensor pin
+  pinMode(NOISE_PIN, INPUT);
+  
   // prepare relay pins
   pinMode(RELAY1_PIN, OUTPUT);
   digitalWrite(RELAY1_PIN, relay1_state);
@@ -260,6 +265,12 @@ void parseCommand() {  //Commands recieved by agent on port 10050 parsing
     relay4();
     client.stop();
   }
+     // Noise
+  else if(cmd.equals("environment.noise")) {
+    UpdateNoise();
+    client.println(noise);
+    client.stop();
+  }
    // NOT SUPPORTED      
   else {
     //  server.println("ZBXDZBX_NOTSUPPORTED");
@@ -289,6 +300,9 @@ void UpdatePressure(){
 }
 void UpdateFlooding(){
   flooding = (digitalRead(WATER_PIN) == HIGH);
+}
+void UpdateNoise(){
+  noise = (digitalRead(NOISE_PIN) == HIGH);
 }
 void UpdateMotion(){
   motion = (digitalRead(MOTION_PIN) == HIGH);
