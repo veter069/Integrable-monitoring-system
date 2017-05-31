@@ -28,11 +28,12 @@
 // Mega2560 -> BMP180; 20 -> (SDA), 21 -> (SCL)
 
 int LED_PIN = 13;
-int DHT11_PIN = A1; 
-int DHT22_PIN = A2; 
 int WATER_PIN = 26;
+int PIEZO_PIN = 46;
 int MOTION_PIN = 50;
 int CO2_PIN = A0;
+int DHT11_PIN = A1; 
+int DHT22_PIN = A2; 
 
 DHT* dht11;
 DHT* dht22;
@@ -50,8 +51,9 @@ int co2 = 666;
 #define DHTTYPE_11 DHT11
 #define DHTTYPE_22 DHT22
 //--------------------------------------------
-byte mac[] = { 0x90, 0xA2, 0xDA, 0x00, 0xE3, 0x5B };
+byte mac[] = { 0x90, 0xa2, 0xda, 0x01, 0xe3, 0x5b };
 
+// NEED TO TEST DHCP
 IPAddress ip(192, 168, 1, 134);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
@@ -71,7 +73,7 @@ void setup()
   bmp.begin();
   
   Serial.begin(9600);
-  Ethernet.begin(mac, ip, gateway, subnet);
+  Ethernet.begin(mac, ip, gateway, subnet);// NEED TO TEST DHCP
   if (!bmp.begin()) {
     Serial.println("Could not find a valid BMP085 sensor, check wiring!");}
 
@@ -101,6 +103,8 @@ void setup()
   // prepare CO2 Sensor pin
   pinMode(CO2_PIN, INPUT);
 
+  // prepare piezo buzzer pin
+  pinMode(PIEZO_PIN, OUTPUT);
 }
 
 void loop()
@@ -213,7 +217,12 @@ void parseCommand() {  //Commands recieved by agent on port 10050 parsing
     client.println(co2);
     client.stop();
   }
-   // NOT SUPPORTED      
+     // Buzzer beep
+  else if(cmd.equals("environment.buzzer")) {
+    beep(15, 5);
+    client.stop();
+  }
+    // NOT SUPPORTED      
   else {
     //  server.println("ZBXDZBX_NOTSUPPORTED");
     client.println(cmd);
@@ -243,11 +252,18 @@ void UpdatePressure(){
 void UpdateFlooding(){
   flooding = (digitalRead(WATER_PIN) == HIGH);
 }
-
 void UpdateMotion(){
   motion = (digitalRead(MOTION_PIN) == HIGH);
 }
-
 void UpdateCO2(){
   co2 = analogRead(CO2_PIN);
 }
+void beep(unsigned char delayms,unsigned char cicle){
+  for (int z=0; z < cicle; z++){
+   for (int i=0; i <= 255; i++){
+      analogWrite(PIEZO_PIN, i);
+      delay(delayms);
+   } 
+}
+}
+
