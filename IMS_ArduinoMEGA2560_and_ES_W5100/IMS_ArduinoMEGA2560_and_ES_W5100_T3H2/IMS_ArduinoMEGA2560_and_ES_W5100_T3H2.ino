@@ -24,6 +24,8 @@
 #define MAX_CMD_LENGTH   50
 #define MAX_CMD_LENGTH   25
 
+#define DEBUG 1
+
 // Connect VCC of the BMP_085/180 sensor to 3.3V (NOT 5.0V!)
 // Mega2560 -> BMP180; 20 -> (SDA), 21 -> (SCL)
 
@@ -78,23 +80,31 @@ Adafruit_BMP085 bmp;
 
 void setup()
 {
-  dht11 = new DHT(DHT11_PIN, DHTTYPE_11);
-  dht22 = new DHT(DHT22_PIN, DHTTYPE_22);
-  bmp.begin();
-  
+#ifdef DEBUG
   Serial.begin(9600);
-  Ethernet.begin(mac, ip, gateway, subnet);// NEED TO TEST DHCP
-  if (!bmp.begin()) {
-    Serial.println("Could not find a valid BMP085 sensor, check wiring!");}
+#endif
+	
+  initializeSensors();
 
+  initializeOutputs();
+  
+  initializeNetwork();
+}
+
+void initializeNetwork(){
+  Ethernet.begin(mac, ip, gateway, subnet);// NEED TO TEST DHCP
+#ifdef DEBUG
   Serial.print("server is at ");
   Serial.println(Ethernet.localIP());
-  
-  pinMode(2, OUTPUT); //???
-  pinMode(7, INPUT_PULLUP); //???
-  
-  pinMode(LED_PIN, OUTPUT);    
-  digitalWrite(LED_PIN, LOW);
+#endif
+}
+
+void initializeSensors(){
+  bmp.begin();
+
+  dht11 = new DHT(DHT11_PIN, DHTTYPE_11);
+  dht22 = new DHT(DHT22_PIN, DHTTYPE_22);
+
   
   // prepare DHT22
   pinMode(DHT22_PIN, OUTPUT);
@@ -119,6 +129,14 @@ void setup()
   // prepare noise sensor pin
   pinMode(NOISE_PIN, INPUT);
   
+  pinMode(2, OUTPUT); //???
+  pinMode(7, INPUT_PULLUP); //???
+}
+
+void initializeOutputs(){
+  pinMode(LED_PIN, OUTPUT); // blinking is essencial, ikr
+  digitalWrite(LED_PIN, LOW);
+  
   // prepare relay pins
   pinMode(RELAY1_PIN, OUTPUT);
   digitalWrite(RELAY1_PIN, relay1_state);
@@ -129,6 +147,7 @@ void setup()
   pinMode(RELAY4_PIN, OUTPUT);
   digitalWrite(RELAY4_PIN, relay4_state);
 }
+
 
 void loop()
 {
@@ -164,7 +183,9 @@ void readTelnetCommand(char c) {
 }
 //--------------------------------------------
 void parseCommand() {  //Commands recieved by agent on port 10050 parsing
+#ifdef DEBUG
   Serial.println(cmd);
+#endif
   // AGENT.PING      
   if(cmd.equals("agent.ping")) {
       client.println("1");
