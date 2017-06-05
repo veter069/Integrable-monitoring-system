@@ -83,7 +83,7 @@ void setup()
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
-	
+  
   initializeSensors();
 
   initializeOutputs();
@@ -355,5 +355,3 @@ void relay4(){
   relay4_state = !relay4_state;
   digitalWrite(RELAY4_PIN, relay4_state); 
 }
-
-
